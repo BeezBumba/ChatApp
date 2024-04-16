@@ -1,0 +1,24 @@
+/* styles.css */
+
+/* Minimalistic Welcome Text */
+h1 {
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Rounded Google Sign-In Button */
+.google-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4285F4;
+    color: #ffffff;
+    border-radius: 50px; /* Make it rounded */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.google-button:hover {
+    background-color: #3367D6; /* Slightly darker on hover */
+}
