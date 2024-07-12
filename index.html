@@ -409,13 +409,7 @@
             isRecording.value = false
           }
         }
-
-        onMounted(() => {
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-          }
-        })
-
+        
         return {
           loggedIn,
           email,
