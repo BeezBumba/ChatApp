@@ -157,6 +157,80 @@
       color: #ff9500;
       font-style: italic;
     }
+    .chat-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #c8c7cc;
+      align-items: center;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #c8c7cc;
+      border-radius: 20px;
+      margin-right: 10px;
+    }
+    .chat-input button {
+      background-color: #007aff;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    .chat-input .media-buttons {
+      display: flex;
+      margin-right: 10px;
+    }
+    .chat-input .media-button {
+      background-color: #34c759;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-right: 5px;
+      font-size: 20px;
+    }
+    .message {
+      max-width: 70%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 20px;
+      word-wrap: break-word;
+    }
+    .message.sent {
+      align-self: flex-end;
+      background-color: #007aff;
+      color: white;
+    }
+    .message.received {
+      align-self: flex-start;
+      background-color: #e5e5ea;
+      color: black;
+    }
+    .message img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+    .message audio {
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -211,6 +285,33 @@
           </div>
         </div>
       </div>
+
+      <div v-else class="chat-view">
+        <div class="header">
+          <button @click="closeChat">&lt; Back</button>
+          <span>{{ currentChat.email }}</span>
+        </div>
+        <div class="chat-messages">
+          <div v-for="message in currentChat.messages" :key="message.id" :class="['message', message.sender === email ? 'sent' : 'received']">
+            <img v-if="message.type === 'image'" :src="message.content" alt="Sent image">
+            <audio v-else-if="message.type === 'audio'" controls>
+              <source :src="message.content" type="audio/mpeg">
+              Your browser does not support the audio element.
+            </audio>
+            <span v-else>{{ message.content }}</span>
+          </div>
+        </div>
+        <div class="chat-input">
+          <div class="media-buttons">
+            <input type="file" ref="imageInput" @change="sendImage" accept="image/*" style="display: none;">
+            <button @click="$refs.imageInput.click()" class="media-button">🖼️</button>
+            <button @click="startRecording" v-if="!isRecording" class="media-button">🎙️</button>
+            <button @click="stopRecording" v-else class="media-button" style="background-color: #ff3b30;">⏹️</button>
+          </div>
+          <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Type a message...">
+          <button @click="sendMessage">Send</button>
+        </div>
+      </div>
     </template>
 
     <!-- Add Friend Modal -->
@@ -244,17 +345,18 @@
         const showAddFriendModal = ref(false)
         const newFriendEmail = ref('')
         const notification = ref('')
-
+        const currentChat = ref(null)
+        const newMessage = ref('')
+        const isRecording = ref(false)
+        let mediaRecorder = null
+        let audioChunks = []
+        
         const login = () => {
           if (email.value && password.value) {
             loggedIn.value = true
             // Simulate receiving friend requests
             setTimeout(() => {
-              friendRequests.value = [
-                { email: 'john@example.com' },
-                { email: 'sarah@example.com' }
-              ]
-            }, 2000)
+              friendRequests.value = []
           }
         }
 
@@ -299,6 +401,77 @@
           }, 3000)
         }
 
+        const openChat = (friend) => {
+          currentChat.value = friend
+        }
+
+        const closeChat = () => {
+          currentChat.value = null
+        }
+
+        const sendMessage = () => {
+          if (newMessage.value.trim() && currentChat.value) {
+            currentChat.value.messages.push({
+              id: Date.now(),
+              content: newMessage.value,
+              sender: email.value,
+              type: 'text'
+            })
+            newMessage.value = ''
+          }
+        }
+
+        const sendImage = (event) => {
+          const file = event.target.files[0]
+          if (file && currentChat.value) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+              currentChat.value.messages.push({
+                id: Date.now(),
+                content: e.target.result,
+                sender: email.value,
+                type: 'image'
+              })
+            }
+            reader.readAsDataURL(file)
+          }
+        }
+
+        const startRecording = async () => {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            mediaRecorder = new MediaRecorder(stream)
+            mediaRecorder.ondataavailable = (event) => {
+              audioChunks.push(event.data)
+            }
+            mediaRecorder.onstop = () => {
+              const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' })
+              const audioUrl = URL.createObjectURL(audioBlob)
+              currentChat.value.messages.push({
+                id: Date.now(),
+                content: audioUrl,
+                sender: email.value,
+                type: 'audio'
+              })
+              audioChunks = []
+            }
+            mediaRecorder.start()
+            isRecording.value = true
+          } catch (error) {
+            console.error('Error accessing microphone:', error)
+            notification.value = "Error accessing microphone. Please check your permissions."
+          }
+        }
+
+        const stopRecording = () => {
+          if (mediaRecorder && isRecording.value) {
+            mediaRecorder.stop()
+            isRecording.value = false
+          }
+        }
+
+
+        
 
         return {
           loggedIn,
