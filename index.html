@@ -351,14 +351,15 @@
         let mediaRecorder = null
         let audioChunks = []
         
-        const login = () => {
-          if (email.value && password.value) {
-            loggedIn.value = true
-            // Simulate receiving friend requests
-            setTimeout(()) => {
-              friendRequests.value = []
-          }
+       const login = () => {
+        if (email.value && password.value) {
+          loggedIn.value = true;
+          // Simulate receiving friend requests
+          setTimeout(() => {
+            friendRequests.value = [];
+          }, 1000); // You can adjust the delay as needed
         }
+      };
 
 
         const signup = () => {
