@@ -286,7 +286,7 @@
         </div>
       </div>
 
-      <div v-else class="chat-view">
+      <div v-if="currentChat" class="chat-view">
         <div class="header">
           <button @click="closeChat">&lt; Back</button>
           <span>{{ currentChat.email }}</span>
@@ -423,7 +423,7 @@
           }
         }
 
-        const sendImage = (event) => {
+        const sendImage =(event) => {
           const file = event.target.files[0]
           if (file && currentChat.value) {
             const reader = new FileReader()
@@ -471,9 +471,6 @@
             isRecording.value = false
           }
         }
-
-
-        
 
         return {
           loggedIn,
