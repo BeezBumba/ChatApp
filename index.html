@@ -1,9 +1,13 @@
-<html><head><base href="https://websim.ai/c/chatios-friend-requests"><title>ChatIOS - Friend Requests</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <link rel="apple-touch-icon" href="/icon-192x192.png" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="/icon-192x192.png">
   <link rel="stylesheet" href="styles.css">
+  <title>ChatIOS - Friend Requests</title>
 </head>
 <body>
   <div id="app">
@@ -60,7 +64,7 @@
 
       <div v-if="currentChat" class="chat-view">
         <div class="header">
-          <button @click="closeChat">&lt; Back</button>
+          <button @click="closeChat">< Back</button>
           <span>{{ currentChat.email }}</span>
         </div>
         <div class="chat-messages">
